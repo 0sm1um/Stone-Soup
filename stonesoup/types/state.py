@@ -83,8 +83,16 @@ class CreatableFromState:
     class_mapping = {}
 
     def __init_subclass__(cls, **kwargs):
-        state_type = cls.__bases__[-1]
-        base_class = cls.__bases__[0]
+        bases = cls.__bases__
+        if len(bases) != 2:
+            ValueError('A CreatableFromState subclass must have exactly two superclasses')
+        base_class, state_type = cls.__bases__
+        if not isinstance(base_class, CreatableFromState):
+            ValueError('The first superclass of a CreatableFromState subclass must be a '
+                       'CreatableFromState (or a subclass)')
+        if not isinstance(state_type, State):
+            ValueError('The second superclass of a CreatableFromState subclass must be a '
+                       'State (or a subclass)')
         if base_class not in CreatableFromState.class_mapping:
             CreatableFromState.class_mapping[base_class] = {}
         CreatableFromState.class_mapping[base_class][state_type] = cls
