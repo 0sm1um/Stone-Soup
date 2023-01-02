@@ -5,7 +5,9 @@ from .hypothesis import Hypothesis, CompositeHypothesis
 from .mixture import GaussianMixture
 from .state import CreatableFromState, CompositeState
 from .state import State, GaussianState, ParticleState, EnsembleState, \
-    SqrtGaussianState, InformationState, CategoricalState, ASDGaussianState
+    SqrtGaussianState, InformationState, CategoricalState, ASDGaussianState, \
+    GaussianMixtureState
+
 from ..base import Property
 
 
@@ -96,3 +98,23 @@ class CompositeUpdate(Update, CompositeState):
         doc="Sequence of sub-updates comprising the composite update. All sub-updates must have "
             "matching timestamp. Must not be empty.")
     hypothesis: CompositeHypothesis = Property(doc="Hypothesis used for updating")
+
+
+class WeightedGaussianStateUpdate(Update, WeightedGaussianState):
+    """ WeightedGaussianStateUpdate type
+    This is an Gaussian state update object, which is augmented with a
+    weight  property.
+    """
+
+
+class GaussianMixtureStateUpdate(Update, GaussianMixtureState):
+    """ GaussianMixtureStateUpdate type
+    This is GaussianMixtureStateUpdate type, which is can be views as a
+    wrapper around a collection of WeightedGaussianStateUpdate objects.
+    """
+
+    def __init__(self, components, *args, **kwargs):
+        super().__init__(components, *args, **kwargs)
+        if any([ not isinstance(component, Update)
+                 for component in components]):
+            raise TypeError("All components must be subclasses of Update")
